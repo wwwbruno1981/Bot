@@ -1,0 +1,2 @@
+# Bot
+Bot-Trading-JS
