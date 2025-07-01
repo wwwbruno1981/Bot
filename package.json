@@ -1,0 +1,49 @@
+{
+  "name": "btc-trading-bot",
+  "version": "2.0.0",
+  "description": "Bot de trading avançado para BTC/USDT na Binance usando estratégia de médias móveis",
+  "main": "src/bot.js",
+  "scripts": {
+    "start": "node src/bot.js",
+    "dev": "nodemon src/bot.js",
+    "test": "node tests/test.js",
+    "simulate": "SIMULATE_TRADING=true node src/bot.js",
+    "setup": "node scripts/setup.js",
+    "logs": "tail -f logs/trading-bot.log",
+    "clean-logs": "rm -rf logs/*.log"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "chalk": "^4.1.2",
+    "dotenv": "^16.3.1",
+    "module-alias": "^2.2.3",
+    "moment": "^2.29.4",
+    "winston": "^3.11.0",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "trading",
+    "bitcoin",
+    "binance",
+    "bot",
+    "cryptocurrency",
+    "automated-trading",
+    "ema",
+    "sma",
+    "risk-management"
+  ],
+  "author": "Trading Bot Developer",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seu-usuario/btc-trading-bot.git"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "engineStrict": true
+}
