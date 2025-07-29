@@ -1,44 +1,42 @@
-require('dotenv').config();
+// index.js
+require('dotenv').config(); // Carrega as variáveis de ambiente do .env
+const BinanceTradingBot = require('./src/core/BinanceTradingBot');
+const { handleCriticalError } = require('./src/utils/ErrorHandler'); // Para capturar erros não tratados
 
-console.log('🔍 DEBUG - Variáveis de ambiente:');
-console.log('API_KEY:', process.env.BINANCE_API_KEY ? 'Configurada ✅' : 'Não encontrada ❌');
-console.log('API_SECRET:', process.env.BINANCE_API_SECRET ? 'Configurada ✅' : 'Não encontrada ❌');
-console.log('BASE_URL:', process.env.BINANCE_BASE_URL || 'Não encontrada ❌');
-console.log('WS_URL:', process.env.BINANCE_WS_URL || 'Não encontrada ❌');
-console.log('---');
+let bot; // Variável para a instância do bot
 
-// Importa e executa o bot da pasta src
-const BotClass = require('./src/bot');
+const startBot = async () => {
+    try {
+        console.log('Iniciando o bot de trading...');
+        bot = new BinanceTradingBot();
+        await bot.init();
+        console.log('Bot de trading iniciado com sucesso!');
+    } catch (error) {
+        await handleCriticalError(error, 'Erro fatal durante a inicialização do bot.');
+        process.exit(1); // Sai do processo com código de erro
+    }
+};
+
+const stopBot = async () => {
+    if (bot) {
+        console.log('Desligando o bot de trading...');
+        await bot.stop();
+        console.log('Bot de trading desligado com sucesso!');
+    }
+    process.exit(0); // Sai do processo normalmente
+};
 
 // Inicia o bot
-console.log('🤖 Iniciando bot...');
+startBot();
 
-// Verifica se é uma classe/constructor e instancia corretamente
-if (typeof BotClass === 'function') {
-    try {
-        // Tenta instanciar como classe
-        const botInstance = new BotClass();
-        
-        // Depois tenta chamar métodos de inicialização
-        if (typeof botInstance.start === 'function') {
-            botInstance.start();
-        } else if (typeof botInstance.init === 'function') {
-            botInstance.init();
-        } else {
-            console.log('✅ Bot instanciado com sucesso!');
-        }
-    } catch (error) {
-        // Se falhar como classe, tenta como função normal
-        try {
-            BotClass();
-        } catch (e) {
-            console.error('❌ Erro ao inicializar bot:', e.message);
-        }
-    }
-} else if (BotClass && typeof BotClass.start === 'function') {
-    BotClass.start();
-} else if (BotClass && typeof BotClass.init === 'function') {
-    BotClass.init();
-} else {
-    console.log('✅ Bot carregado com sucesso!');
-}
+// Lida com o desligamento gracioso do bot em caso de sinais de interrupção
+process.on('SIGINT', stopBot);  // Ctrl+C
+process.on('SIGTERM', stopBot); // Sinal de término (usado por gerenciadores de processos como PM2)
+process.on('uncaughtException', async (error) => {
+    await handleCriticalError(error, 'Exceção não capturada! O bot será desligado.');
+    stopBot(); // Tenta desligar o bot graciosamente
+});
+process.on('unhandledRejection', async (reason, promise) => {
+    await handleCriticalError(new Error(`Rejeição de Promise não tratada: ${reason}`), 'Rejeição de Promise não tratada! O bot será desligado.');
+    stopBot(); // Tenta desligar o bot graciosamente
+});
